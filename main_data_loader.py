@@ -14,18 +14,50 @@ from fredapi import Fred
 # before running this script if executed in a Colab environment.
 print("✔ Google Drive assumed mounted.")
 
-# Set FRED API Key (using FRED_API as expected by the patched CoreDataLoader)
-# This will be picked up by os.environ.get("FRED_API")
-# The key is set directly in the Colab notebook's environment.
-os.environ["FRED_API"] = "3fd12c9d0fa4d7fd3c858b72251e3388"
-print("✔ FRED_API set as environment variable.")
+# Set FRED API Key from environment or load from env file
+# Priority: 1) Already set env var, 2) Load from env file
+if "FRED_API_KEY" not in os.environ:
+    env_file = os.path.join(os.path.dirname(__file__), 'env')
+    if os.path.exists(env_file):
+        with open(env_file) as f:
+            for line in f:
+                line = line.strip()
+                if line and not line.startswith('#') and '=' in line:
+                    key, value = line.split('=', 1)
+                    os.environ[key.strip()] = value.strip()
+        print("✔ Environment variables loaded from env file.")
+    else:
+        print("⚠️ No env file found. Please set FRED_API_KEY environment variable.")
+
+# Use FRED_API_KEY (standardized name)
+if "FRED_API_KEY" in os.environ:
+    os.environ["FRED_API"] = os.environ["FRED_API_KEY"]  # For backward compatibility
+    print("✔ FRED_API_KEY loaded successfully.")
+else:
+    print("⚠️ FRED_API_KEY not set. Data fetching may fail.")
 
 # --- Configuration Paths ---
-DATA_DIR = "/content/drive/MyDrive/financial_engine/data_raw"
-REGISTRY_PATH = "/content/drive/MyDrive/financial_engine/registry/prism_metric_registry.json"
+# Detect if running in Colab or locally
+try:
+    import google.colab
+    IN_COLAB = True
+    BASE_DIR = "/content/drive/MyDrive/financial_engine"
+except ImportError:
+    IN_COLAB = False
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Allow override via environment variable
+BASE_DIR = os.environ.get("FINANCIAL_ENGINE_BASE_DIR", BASE_DIR)
+
+DATA_DIR = os.path.join(BASE_DIR, "data_raw")
+REGISTRY_PATH = os.path.join(BASE_DIR, "registry", "prism_metric_registry.json")
 
 os.makedirs(DATA_DIR, exist_ok=True)
 os.makedirs(os.path.dirname(REGISTRY_PATH), exist_ok=True)
+
+print(f"✔ Base directory: {BASE_DIR}")
+print(f"✔ Data directory: {DATA_DIR}")
+print(f"✔ Registry path: {REGISTRY_PATH}")
 
 
 # --- Create / Correct prism_metric_registry.json ---

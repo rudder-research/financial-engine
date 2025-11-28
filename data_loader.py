@@ -1,13 +1,20 @@
 """PRISM Data Loader"""
 
 import os
+import sys
 import json
 import pandas as pd
 from fredapi import Fred
 import yfinance as yf
 from typing import Optional
 
-from .config import DATA_RAW, METRIC_REGISTRY
+# Import config - handle both relative and absolute imports
+try:
+    from .config import DATA_RAW, METRIC_REGISTRY
+except ImportError:
+    # Add parent directory to path for standalone execution
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    from config import DATA_RAW, METRIC_REGISTRY
 
 def load_registry():
     if not METRIC_REGISTRY.exists():

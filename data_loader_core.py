@@ -11,10 +11,23 @@ try:
 except ImportError:
     userdata = None
 
-DATA_DIR = "/content/drive/MyDrive/prism_engine/data_raw"
-REGISTRY_PATH = "/content/drive/MyDrive/prism_engine/registry/prism_metric_registry.json"
+# Detect if running in Colab or locally
+try:
+    import google.colab
+    IN_COLAB = True
+    BASE_DIR = "/content/drive/MyDrive/prism_engine"
+except ImportError:
+    IN_COLAB = False
+    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+# Allow override via environment variable
+BASE_DIR = os.environ.get("PRISM_ENGINE_BASE_DIR", BASE_DIR)
+
+DATA_DIR = os.path.join(BASE_DIR, "data_raw")
+REGISTRY_PATH = os.path.join(BASE_DIR, "registry", "prism_metric_registry.json")
 
 os.makedirs(DATA_DIR, exist_ok=True)
+os.makedirs(os.path.dirname(REGISTRY_PATH), exist_ok=True)
 
 class CoreDataLoader:
 
@@ -29,12 +42,15 @@ class CoreDataLoader:
     def init_fred(self):
         api_key = None
         if userdata: # Check if running in Colab and userdata is available
-            api_key = userdata.get("FRED_API") # Changed from FRED_API_KEY to FRED_API
+            try:
+                api_key = userdata.get("FRED_API_KEY")
+            except:
+                pass
         if not api_key: # Fallback to os.environ if not found via userdata or not in Colab
-            api_key = os.environ.get("FRED_API") # Changed from FRED_API_KEY to FRED_API
+            api_key = os.environ.get("FRED_API_KEY") or os.environ.get("FRED_API")
 
         if api_key is None:
-            raise ValueError("⚠️ FRED_API not set. Please set it in Colab secrets (named FRED_API) or as an environment variable.")
+            raise ValueError("⚠️ FRED_API_KEY not set. Please set it in Colab secrets (named FRED_API_KEY) or as an environment variable.")
         self.fred = Fred(api_key)
 
     # -----------------------------------------
