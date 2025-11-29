@@ -11,17 +11,13 @@ try:
 except ImportError:
     userdata = None
 
-# Detect if running in Colab or locally
-try:
-    import google.colab
-    IN_COLAB = True
-    BASE_DIR = "/content/drive/MyDrive/prism_engine"
-except ImportError:
-    IN_COLAB = False
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Always use relative paths based on this file's location
+# This makes the project portable - drop it anywhere and it works
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Allow override via environment variable
-BASE_DIR = os.environ.get("PRISM_ENGINE_BASE_DIR", BASE_DIR)
+# Allow override via environment variable (optional)
+if "PRISM_ENGINE_BASE_DIR" in os.environ:
+    BASE_DIR = os.environ["PRISM_ENGINE_BASE_DIR"]
 
 DATA_DIR = os.path.join(BASE_DIR, "data_raw")
 REGISTRY_PATH = os.path.join(BASE_DIR, "registry", "prism_metric_registry.json")

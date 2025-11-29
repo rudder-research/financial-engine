@@ -59,18 +59,19 @@ FRED_API_KEY=your_actual_api_key_here
 
 **Get a FRED API Key**: https://fred.stlouisfed.org/docs/api/api_key.html
 
-### 3. Configure Paths (Optional)
+### 3. Paths (Automatic & Portable)
 
-The engine automatically detects whether it's running in Google Colab or locally:
+**The engine is fully portable** - it automatically uses relative paths based on where you place it:
 
-- **In Colab**: Uses `/content/drive/MyDrive/prism_engine/`
-- **Locally**: Uses the project directory
+- All data is stored relative to the project folder
+- `data_raw/`, `registry/`, `outputs/` folders created automatically
+- **Drop the folder anywhere and it works** - no configuration needed
 
-To override, set environment variables:
+To override and use a custom location, set environment variables:
 
 ```bash
 export PRISM_ENGINE_BASE_DIR=/path/to/your/data
-# or
+# or for main_data_loader.py
 export FINANCIAL_ENGINE_BASE_DIR=/path/to/your/data
 ```
 
@@ -94,15 +95,20 @@ This will:
 ### Using in Google Colab
 
 ```python
-# Mount Google Drive
+# Mount Google Drive (if saving to Drive)
 from google.colab import drive
 drive.mount('/content/drive')
 
-# Clone or navigate to the repository
-%cd /content/drive/MyDrive/
+# Clone or upload the repository to any location
+%cd /content/your-folder/
 
-# Run the data loader
-!python financial-engine/main_data_loader.py
+# Run the data loader - it will create data folders right here
+!python main_data_loader.py
+
+# Or store data in Drive by setting environment variable:
+import os
+os.environ['FINANCIAL_ENGINE_BASE_DIR'] = '/content/drive/MyDrive/financial_data'
+!python main_data_loader.py
 ```
 
 ### Data Sources
