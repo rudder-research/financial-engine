@@ -6,17 +6,13 @@ PRISM Engine Configuration
 from pathlib import Path
 import os
 
-# Detect if running in Colab or locally
-try:
-    import google.colab
-    IN_COLAB = True
-    BASE_DIR = Path("/content/drive/MyDrive/prism_engine")
-except ImportError:
-    IN_COLAB = False
-    BASE_DIR = Path(__file__).parent.absolute()
+# Always use relative paths based on this file's location
+# This makes the project portable - drop it anywhere and it works
+BASE_DIR = Path(__file__).parent.absolute()
 
-# Allow override via environment variable
-BASE_DIR = Path(os.environ.get("PRISM_ENGINE_BASE_DIR", str(BASE_DIR)))
+# Allow override via environment variable (optional)
+if "PRISM_ENGINE_BASE_DIR" in os.environ:
+    BASE_DIR = Path(os.environ["PRISM_ENGINE_BASE_DIR"])
 
 DATA_RAW = BASE_DIR / "data_raw"
 DATA_CLEAN = BASE_DIR / "data_clean"

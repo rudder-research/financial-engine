@@ -1,5 +1,6 @@
 
 # main_data_loader.py
+# Portable data loader - works anywhere you drop it
 
 # --- Initial Setup ---
 import os
@@ -10,9 +11,7 @@ import yfinance as yf
 from datetime import datetime
 from fredapi import Fred
 
-# NOTE: Google Drive is expected to be mounted externally in the Colab notebook
-# before running this script if executed in a Colab environment.
-print("✔ Google Drive assumed mounted.")
+print("✔ Starting Financial Engine Data Loader...")
 
 # Set FRED API Key from environment or load from env file
 # Priority: 1) Already set env var, 2) Load from env file
@@ -37,17 +36,13 @@ else:
     print("⚠️ FRED_API_KEY not set. Data fetching may fail.")
 
 # --- Configuration Paths ---
-# Detect if running in Colab or locally
-try:
-    import google.colab
-    IN_COLAB = True
-    BASE_DIR = "/content/drive/MyDrive/financial_engine"
-except ImportError:
-    IN_COLAB = False
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+# Always use relative paths based on this file's location
+# This makes the project portable - drop it anywhere and it works
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
-# Allow override via environment variable
-BASE_DIR = os.environ.get("FINANCIAL_ENGINE_BASE_DIR", BASE_DIR)
+# Allow override via environment variable (optional)
+if "FINANCIAL_ENGINE_BASE_DIR" in os.environ:
+    BASE_DIR = os.environ["FINANCIAL_ENGINE_BASE_DIR"]
 
 DATA_DIR = os.path.join(BASE_DIR, "data_raw")
 REGISTRY_PATH = os.path.join(BASE_DIR, "registry", "prism_metric_registry.json")
